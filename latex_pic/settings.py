@@ -12,7 +12,6 @@ from pathlib import Path
 class Settings:
     hotkey: str = "`"
     enabled: bool = True
-    wrap_math: bool = False
     start_minimized: bool = False
     start_on_boot: bool = False
     api_base: str = "https://openrouter.ai/api/v1"
