@@ -31,6 +31,7 @@ class LatexPicApp:
         self.tray: pystray.Icon | None = None
 
         self.hotkey_var = tk.StringVar(value=self.settings.hotkey)
+        self.wrap_var = tk.BooleanVar(value=self.settings.wrap_math)
         self.start_on_boot_var = tk.BooleanVar(value=self.settings.start_on_boot)
         self.api_key_var = tk.StringVar(value=load_api_key())
         self.api_base_var = tk.StringVar(value=self.settings.api_base)
@@ -57,6 +58,7 @@ class LatexPicApp:
         ttk.Label(frame, text="示例：`、f8、ctrl+alt+l", foreground="#666666").pack(
             anchor="w", padx=(76, 0), pady=(4, 8)
         )
+        ttk.Checkbutton(frame, text="结果外层添加 $...$", variable=self.wrap_var).pack(anchor="w")
         ttk.Checkbutton(frame, text="开机自动启动（启动后隐藏到系统托盘）", variable=self.start_on_boot_var).pack(anchor="w", pady=(5, 0))
 
         engine_box = ttk.LabelFrame(frame, text="API 设置", padding=10)
@@ -132,6 +134,7 @@ class LatexPicApp:
             messagebox.showwarning("热键无效", "热键不能为空。", parent=self.root)
             return
         self.settings.hotkey = hotkey
+        self.settings.wrap_math = self.wrap_var.get()
         self.settings.start_on_boot = self.start_on_boot_var.get()
         save_api_key(self.api_key_var.get())
         self.settings.api_base = self.api_base_var.get().strip() or "https://openrouter.ai/api/v1"
@@ -168,6 +171,7 @@ class LatexPicApp:
                 load_api_key(),
                 self.settings.api_base,
                 self.settings.api_model,
+                self.settings.wrap_math,
             )
             self.result_queue.put(("success", latex))
         except Exception as exc:

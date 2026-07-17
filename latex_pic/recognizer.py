@@ -9,19 +9,31 @@ from PIL import Image
 
 
 class ApiFormulaRecognizer:
-    def recognize(self, image: Image.Image, api_key: str, api_base: str, model: str) -> str:
+    def recognize(
+        self,
+        image: Image.Image,
+        api_key: str,
+        api_base: str,
+        model: str,
+        wrap_math: bool = False,
+    ) -> str:
         key = api_key.strip() or os.environ.get("OPENROUTER_API_KEY", "")
         if not key:
             raise RuntimeError("请先在主窗口填写 OpenRouter API Key")
         buffer = io.BytesIO()
         image.convert("RGB").save(buffer, format="JPEG", quality=92, optimize=True)
         encoded = base64.b64encode(buffer.getvalue()).decode("ascii")
+        output_rule = (
+            "Wrap the final LaTeX result in exactly one pair of dollar signs: $...$."
+            if wrap_math
+            else "Do not include any surrounding dollar signs in the output."
+        )
         payload = {
             "model": model.strip() or "google/gemini-2.5-flash-lite",
             "messages": [{
                 "role": "user",
                 "content": [
-                    {"type": "text", "text": "Transcribe every mathematical formula in this image to LaTeX. Return only raw LaTeX, without Markdown fences, explanations, or surrounding dollar signs. Preserve line breaks when needed."},
+                    {"type": "text", "text": f"Transcribe every mathematical formula in this image to LaTeX. Return only LaTeX, without Markdown fences or explanations. {output_rule} Preserve line breaks when needed."},
                     {"type": "image_url", "image_url": {"url": f"data:image/jpeg;base64,{encoded}"}},
                 ],
             }],
