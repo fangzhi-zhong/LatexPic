@@ -7,7 +7,7 @@
 - 支持 `Win + Shift + S`、Windows 截图工具及其他会把图片写入剪贴板的截图软件
 - 默认使用键盘左上角的 `` ` / ~ `` 键触发识别
 - 支持自定义全局热键，例如 `F8`、`Ctrl+Alt+L`
-- 使用 OpenAI API 快速识别公式
+- 使用 OpenRouter API 快速识别公式
 - 自动将识别结果复制到剪贴板
 - 可选择为结果添加 `$...$`
 - 开始、成功和失败时显示 Windows 右下角通知
@@ -19,7 +19,7 @@
 
 - Windows 10 或 Windows 11
 - 64 位 Python 3.11 或 3.12
-- 使用 API 模式时需要网络和 OpenAI API Key
+- 使用时需要网络和 OpenRouter API Key
 
 ## 安装
 
@@ -55,11 +55,11 @@ python main.py
 默认使用：
 
 ```text
-模型：gpt-4o-mini
-接口：https://api.openai.com/v1
+模型：google/gemini-2.5-flash-lite
+接口：https://openrouter.ai/api/v1
 ```
 
-在 [OpenAI API Keys](https://platform.openai.com/api-keys) 创建密钥，然后任选一种配置方式。
+在 [OpenRouter Keys](https://openrouter.ai/settings/keys) 创建密钥，然后任选一种配置方式。
 
 ### 在界面中配置
 
@@ -70,13 +70,13 @@ python main.py
 复制 `.env.example` 为 `.env`：
 
 ```env
-OPENAI_API_KEY=sk-your-key-here
+OPENROUTER_API_KEY=sk-or-v1-your-key-here
 ```
 
-程序优先读取 Windows 环境变量 `OPENAI_API_KEY`，其次读取项目根目录 `.env`。
+程序优先读取 Windows 环境变量 `OPENROUTER_API_KEY`，其次读取项目根目录 `.env`。
 
 > [!IMPORTANT]
-> `.env` 已加入 `.gitignore`。不要把 API Key 写进源码、README、截图或 Git 提交中。API 调用会产生费用，ChatGPT 订阅与 API 账单相互独立。
+> `.env` 已加入 `.gitignore`。不要把 API Key 写进源码、README、截图或 Git 提交中。API 调用会消耗 OpenRouter 余额。
 
 ## 热键设置
 
@@ -105,7 +105,7 @@ ctrl+shift+space
 
 | 文件 | 用途 |
 |---|---|
-| `.env` | OpenAI API Key，不提交到 Git |
+| `.env` | OpenRouter API Key，不提交到 Git |
 | `%APPDATA%\LatexPic\settings.json` | 热键、引擎、模型、接口地址等界面设置 |
 | `install.log` | 依赖安装日志 |
 | `startup.log` | 后台启动和运行异常日志 |
@@ -126,11 +126,11 @@ ctrl+shift+space
 
 ### API 返回 401
 
-API Key 无效、已撤销或 `.env` 格式错误。确认内容为 `OPENAI_API_KEY=sk-...`，然后重启程序。
+API Key 无效、已撤销或 `.env` 格式错误。确认内容为 `OPENROUTER_API_KEY=sk-or-v1-...`，然后重启程序。
 
 ### API 返回额度或账单错误
 
-ChatGPT Plus/Pro 不包含 API 额度。请在 OpenAI 开发者平台检查 API Billing 和使用限额。
+请在 OpenRouter 控制台检查余额、用量和限额。OpenRouter 与 ChatGPT 订阅相互独立。
 
 ## 项目结构
 

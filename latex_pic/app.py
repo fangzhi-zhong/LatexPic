@@ -63,7 +63,7 @@ class LatexPicApp:
 
         engine_box = ttk.LabelFrame(frame, text="API 设置", padding=10)
         engine_box.pack(fill="x", pady=(12, 0))
-        ttk.Label(engine_box, text="API Key：").grid(row=0, column=0, sticky="w")
+        ttk.Label(engine_box, text="OpenRouter Key：").grid(row=0, column=0, sticky="w")
         ttk.Entry(engine_box, textvariable=self.api_key_var, show="*").grid(row=0, column=1, columnspan=3, sticky="ew")
         ttk.Label(engine_box, text="模型：").grid(row=1, column=0, sticky="w", pady=(6, 0))
         ttk.Entry(engine_box, textvariable=self.api_model_var, width=18).grid(row=1, column=1, sticky="ew", pady=(6, 0))
@@ -137,8 +137,8 @@ class LatexPicApp:
         self.settings.wrap_math = self.wrap_var.get()
         self.settings.start_on_boot = self.start_on_boot_var.get()
         save_api_key(self.api_key_var.get())
-        self.settings.api_base = self.api_base_var.get().strip() or "https://api.openai.com/v1"
-        self.settings.api_model = self.api_model_var.get().strip() or "gpt-4o-mini"
+        self.settings.api_base = self.api_base_var.get().strip() or "https://openrouter.ai/api/v1"
+        self.settings.api_model = self.api_model_var.get().strip() or "google/gemini-2.5-flash-lite"
         try:
             configure_startup(self.settings.start_on_boot)
         except OSError as exc:

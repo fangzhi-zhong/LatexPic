@@ -10,26 +10,32 @@ from PIL import Image
 
 class ApiFormulaRecognizer:
     def recognize(self, image: Image.Image, api_key: str, api_base: str, model: str) -> str:
-        key = api_key.strip() or os.environ.get("OPENAI_API_KEY", "")
+        key = api_key.strip() or os.environ.get("OPENROUTER_API_KEY", "")
         if not key:
-            raise RuntimeError("请先在主窗口填写 API Key")
+            raise RuntimeError("请先在主窗口填写 OpenRouter API Key")
         buffer = io.BytesIO()
         image.convert("RGB").save(buffer, format="JPEG", quality=92, optimize=True)
         encoded = base64.b64encode(buffer.getvalue()).decode("ascii")
         payload = {
-            "model": model.strip() or "gpt-4o-mini",
-            "input": [{
+            "model": model.strip() or "google/gemini-2.5-flash-lite",
+            "messages": [{
                 "role": "user",
                 "content": [
-                    {"type": "input_text", "text": "Transcribe every mathematical formula in this image to LaTeX. Return only raw LaTeX, without Markdown fences, explanations, or surrounding dollar signs. Preserve line breaks when needed."},
-                    {"type": "input_image", "image_url": f"data:image/jpeg;base64,{encoded}", "detail": "high"},
+                    {"type": "text", "text": "Transcribe every mathematical formula in this image to LaTeX. Return only raw LaTeX, without Markdown fences, explanations, or surrounding dollar signs. Preserve line breaks when needed."},
+                    {"type": "image_url", "image_url": {"url": f"data:image/jpeg;base64,{encoded}"}},
                 ],
             }],
-            "max_output_tokens": 1000,
+            "max_tokens": 1000,
+            "temperature": 0,
         }
         response = requests.post(
-            api_base.rstrip("/") + "/responses",
-            headers={"Authorization": f"Bearer {key}", "Content-Type": "application/json"},
+            api_base.rstrip("/") + "/chat/completions",
+            headers={
+                "Authorization": f"Bearer {key}",
+                "Content-Type": "application/json",
+                "HTTP-Referer": "https://github.com/fangzhi-zhong/LatexPic",
+                "X-OpenRouter-Title": "LatexPic",
+            },
             json=payload,
             timeout=(10, 60),
         )
@@ -40,13 +46,11 @@ class ApiFormulaRecognizer:
                 detail = response.text
             raise RuntimeError(f"API {response.status_code}: {detail[:300]}")
         body = response.json()
-        pieces = [
-            item.get("text", "")
-            for output in body.get("output", [])
-            for item in output.get("content", [])
-            if item.get("type") == "output_text"
-        ]
-        latex = "".join(pieces).strip().strip("`").strip()
+        choices = body.get("choices", [])
+        content = choices[0].get("message", {}).get("content", "") if choices else ""
+        if isinstance(content, list):
+            content = "".join(part.get("text", "") for part in content if isinstance(part, dict))
+        latex = str(content).strip().strip("`").strip()
         if not latex:
             raise RuntimeError("API 没有返回 LaTeX 文本")
         return latex

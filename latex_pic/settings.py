@@ -15,8 +15,8 @@ class Settings:
     wrap_math: bool = False
     start_minimized: bool = False
     start_on_boot: bool = False
-    api_base: str = "https://api.openai.com/v1"
-    api_model: str = "gpt-4o-mini"
+    api_base: str = "https://openrouter.ai/api/v1"
+    api_model: str = "google/gemini-2.5-flash-lite"
 
     @property
     def hotkey_label(self) -> str:
@@ -34,7 +34,7 @@ def env_path() -> Path:
 
 
 def load_api_key() -> str:
-    key = os.environ.get("OPENAI_API_KEY", "").strip()
+    key = os.environ.get("OPENROUTER_API_KEY", "").strip()
     if key:
         return key
     path = env_path()
@@ -43,7 +43,7 @@ def load_api_key() -> str:
     try:
         for raw_line in path.read_text(encoding="utf-8").splitlines():
             line = raw_line.strip()
-            if line.startswith("OPENAI_API_KEY="):
+            if line.startswith("OPENROUTER_API_KEY="):
                 return line.split("=", 1)[1].strip().strip('"').strip("'")
     except OSError:
         pass
@@ -53,11 +53,11 @@ def load_api_key() -> str:
 def save_api_key(api_key: str) -> None:
     path = env_path()
     existing = path.read_text(encoding="utf-8").splitlines() if path.exists() else []
-    replacement = f"OPENAI_API_KEY={api_key.strip()}"
+    replacement = f"OPENROUTER_API_KEY={api_key.strip()}"
     output: list[str] = []
     replaced = False
     for line in existing:
-        if line.strip().startswith("OPENAI_API_KEY="):
+        if line.strip().startswith("OPENROUTER_API_KEY="):
             if not replaced:
                 output.append(replacement)
                 replaced = True
@@ -75,7 +75,12 @@ def load_settings() -> Settings:
     try:
         data = json.loads(path.read_text(encoding="utf-8"))
         allowed = {key: value for key, value in data.items() if key in Settings.__dataclass_fields__}
-        return Settings(**allowed)
+        settings = Settings(**allowed)
+        if settings.api_base.rstrip("/") == "https://api.openai.com/v1":
+            settings.api_base = "https://openrouter.ai/api/v1"
+        if settings.api_model == "gpt-4o-mini":
+            settings.api_model = "google/gemini-2.5-flash-lite"
+        return settings
     except (OSError, ValueError, TypeError):
         return Settings()
 
